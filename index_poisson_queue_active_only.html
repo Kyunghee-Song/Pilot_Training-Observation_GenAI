@@ -346,6 +346,8 @@ hr   { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
     <input class="answer-input" id="obs-answer" type="text" placeholder="Type your answer…"
            onkeydown="if(event.key==='Enter') submitObs()">
 
+    <div class="feedback" id="obs-feedback" style="display:none"></div>
+
     <div id="obs-blanks-wrap" style="display:none; margin-bottom:12px;">
       <div id="obs-blanks" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
     </div>
@@ -972,8 +974,8 @@ function selectTaskType(type) {
   if (activeTaskType === 'wordladder') {
     if (ladderChain.length) logLadderResult(false, true);
   } else if (currentObsProblem) {
-    const isBlanksTask = activeTaskType === 'numbersorting';
-    const userRaw = isBlanksTask ? getBlankValues().join(', ') : (document.getElementById('obs-answer').value || '');
+    const isBlanks = isBlanksTaskType(activeTaskType);
+    const userRaw = isBlanks ? getBlankValues().join(', ') : (document.getElementById('obs-answer').value || '');
     logObsResult(activeTaskType, userRaw, false, true);
   }
 
@@ -1025,13 +1027,13 @@ function generateProofreading() {
   const idx = proofOrder[proofIdx % proofOrder.length];
   proofIdx++;
   const p = PROOFREADING_POOL[idx];
-  return { display: p.text, answer: p.corrections.join(', ') };
+  return { display: p.text, logText: p.text, answerArr: p.corrections };
 }
 
 function generateNumberSorting() {
   const n = 8 + Math.floor(Math.random() * 5); // 8–12 unique numbers
   const set = new Set();
-  while (set.size < n) set.add(Math.floor(Math.random() * 9899) + 100);
+  while (set.size < n) set.add(Math.floor(Math.random() * 900) + 100); // 100–999만 (3자리)
   const arr = [...set];
   const sorted = [...arr].sort((a, b) => a - b);
   return {
@@ -1063,11 +1065,33 @@ function generateHiddenWord() {
   hiddenIdx++;
   const p = HIDDEN_WORD_POOL[idx];
   return {
-    display: `<strong style="font-size:26px; letter-spacing:4px;">${p.pattern}</strong>` +
-              `<div class="clue-text">Clue: ${p.clue}</div>`,
-    logText: `${p.pattern} (clue: ${p.clue})`,
+    display: `<strong style="font-size:26px; letter-spacing:4px;">${p.pattern}</strong>`,
+    logText: p.pattern,
     answer: p.answer
   };
+}
+
+const BLANKS_TASK_CONFIG = {
+  numbersorting: { ordered: true },   // 순서 맞아야 정답
+  proofreading:  { ordered: false },  // 순서 상관없음
+};
+function isBlanksTaskType(type) { return !!BLANKS_TASK_CONFIG[type]; }
+
+function renderBlanks(count) {
+  const wrap = document.getElementById('obs-blanks');
+  wrap.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'blank-input';
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') submitObs(); });
+    wrap.appendChild(inp);
+  }
+  if (wrap.firstChild) wrap.firstChild.focus();
+}
+
+function getBlankValues() {
+  return Array.from(document.querySelectorAll('#obs-blanks .blank-input')).map(el => el.value.trim());
 }
 
 // ── OBSERVATION: LOAD / RENDER / SUBMIT (5 single-answer types) ──────────────
@@ -1112,46 +1136,52 @@ function renderObsProblem() {
   document.getElementById('obs-answer').disabled = false;
   document.getElementById('obs-submit-btn').disabled = false;
 
-  const isBlanksTask = activeTaskType === 'numbersorting';
-  document.getElementById('obs-answer-label').style.display = isBlanksTask ? 'none' : 'block';
-  document.getElementById('obs-answer').style.display       = isBlanksTask ? 'none' : 'block';
-  document.getElementById('obs-blanks-wrap').style.display  = isBlanksTask ? 'block' : 'none';
+  const isBlanks = isBlanksTaskType(activeTaskType);
+  document.getElementById('obs-answer-label').style.display = isBlanks ? 'none' : 'block';
+  document.getElementById('obs-answer').style.display       = isBlanks ? 'none' : 'block';
+  document.getElementById('obs-blanks-wrap').style.display  = isBlanks ? 'block' : 'none';
 
   let html = currentObsProblem.display;
-  if (isBlanksTask) {
+  if (activeTaskType === 'numbersorting') {
     html = 'Sort these numbers from smallest to largest:<div class="num-chip-row">' + currentObsProblem.display + '</div>';
   }
   document.getElementById('obs-problem').innerHTML = html;
   document.getElementById('obs-completed').textContent = `${obsCompleted[activeTaskType]} completed`;
 
-  if (isBlanksTask) {
+  if (isBlanks) {
     renderBlanks(currentObsProblem.answerArr.length);
   } else {
     document.getElementById('obs-answer').placeholder = ANSWER_PLACEHOLDERS[activeTaskType];
     document.getElementById('obs-answer').focus();
   }
 }
-
+  
 function submitObs() {
   if (activeTaskType === 'wordladder') { submitLadderStep(); return; }
   if (submitting) return;
 
-  const isBlanksTask = activeTaskType === 'numbersorting';
+  const isBlanks = isBlanksTaskType(activeTaskType);
   let userRaw, ok;
 
-  if (isBlanksTask) {
+  if (isBlanks) {
     const values = getBlankValues();
     if (values.every(v => !v)) return;
     userRaw = values.join(', ');
-    ok = values.length === currentObsProblem.answerArr.length &&
-         values.every((v, i) => Number(v) === currentObsProblem.answerArr[i]);
+    const target = currentObsProblem.answerArr;
+
+    if (BLANKS_TASK_CONFIG[activeTaskType].ordered) {
+      ok = values.length === target.length && values.every((v, i) => Number(v) === target[i]);
+    } else {
+      const a = values.map(v => v.toLowerCase()).sort();
+      const b = target.map(v => v.toLowerCase()).sort();
+      ok = a.length === b.length && a.every((v, i) => v === b[i]);
+    }
     document.querySelectorAll('#obs-blanks .blank-input').forEach(el => el.disabled = true);
   } else {
     const input = document.getElementById('obs-answer');
     if (input.disabled || !input.value.trim()) return;
     userRaw = input.value;
-    if (activeTaskType === 'proofreading') ok = normList(userRaw) === normList(currentObsProblem.answer);
-    else if (activeTaskType === 'arithmetic') ok = norm(userRaw) === norm(currentObsProblem.answer);
+    if (activeTaskType === 'arithmetic') ok = norm(userRaw) === norm(currentObsProblem.answer);
     else ok = userRaw.trim().toUpperCase() === currentObsProblem.answer.toUpperCase();
     input.disabled = true;
   }
@@ -1169,14 +1199,14 @@ function submitObs() {
   } else {
     submitting = false;
     document.getElementById('obs-next-btn').style.display = 'inline-block';
-    if (isBlanksTask) document.querySelectorAll('#obs-blanks .blank-input').forEach(el => el.disabled = false);
+    if (isBlanks) document.querySelectorAll('#obs-blanks .blank-input').forEach(el => el.disabled = false);
   }
 }
 
 function moveOnObsDispatch() {
   if (activeTaskType === 'wordladder') { moveOnLadder(); return; }
-  const isBlanksTask = activeTaskType === 'numbersorting';
-  const userRaw = isBlanksTask ? getBlankValues().join(', ') : document.getElementById('obs-answer').value;
+  const isBlanks = isBlanksTaskType(activeTaskType);
+  const userRaw = isBlanks ? getBlankValues().join(', ') : document.getElementById('obs-answer').value;
   logObsResult(activeTaskType, userRaw, false, false);
   if (phaseTimeLeft > 0 && !isIdle) loadObsProblem();
 }
@@ -1323,16 +1353,15 @@ function endObservation() {
   if (answerEl) answerEl.disabled = true;
   if (submitEl) submitEl.disabled = true;
 
-  if (!isIdle) {
-    if (activeTaskType === 'wordladder') {
-      if (ladderChain.length) logLadderResult(false, true);
-    } else if (currentObsProblem) {
-      const isBlanksTask = activeTaskType === 'numbersorting';
-      const userRaw = isBlanksTask ? getBlankValues().join(', ') : (answerEl ? answerEl.value : '');
-      logObsResult(activeTaskType, userRaw, false, true);
-    }
+  if (activeTaskType === 'wordladder') {
+    if (ladderChain.length) logLadderResult(false, true);
+  } else if (currentObsProblem) {
+    const isBlanks = isBlanksTaskType(activeTaskType);
+    const userRaw = isBlanks ? getBlankValues().join(', ') : (document.getElementById('obs-answer').value || '');
+    logObsResult(activeTaskType, userRaw, false, true);
   }
 
+  logEvent('switch', { from: activeTaskType, to: type });
   setTimeout(finalizeAndShowDone, 800);
 }
 
