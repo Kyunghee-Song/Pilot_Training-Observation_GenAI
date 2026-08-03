@@ -565,7 +565,7 @@ const QUEUE_CONFIG = {
   hiddenword:    { meanIntervalSec: 90, maxQueue: 8 },
 };
 Object.keys(QUEUE_CONFIG).forEach(k => QUEUE_CONFIG[k].meanIntervalSec /= SPEED);   // ← SPEED로 함께 배속되도록 추가된 줄
-const QUEUES_ACCRUE_IN_BACKGROUND = false; // false = only the active task's queue builds up
+const QUEUES_ACCRUE_IN_BACKGROUND = true; // false = only the active task's queue builds up
 
 let queueCounts = { arithmetic:0, proofreading:0, numbersorting:0, anagram:0, wordladder:0, hiddenword:0 };
 let queueTimers = {};
