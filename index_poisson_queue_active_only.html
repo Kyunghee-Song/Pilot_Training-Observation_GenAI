@@ -373,7 +373,6 @@ hr   { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
   <div class="big-icon">🏁</div>
   <h1>Session Complete!</h1>
   <p>You've finished the full session. Thank you for participating!</p>
-  <div class="results-box" id="final-results-summary"></div>
 </div>
 
 <script src="wordlist.js"></script>
@@ -1384,11 +1383,26 @@ function endObservation() {
 function finalizeAndShowDone() {
   results.timestamp = new Date().toISOString();
 
+  const countCorrect = arr => arr.filter(r => r.correct).length;
+  const t = results.training, o = results.observation;
+  const summary = JSON.stringify({
+    training_arithmetic:  `${countCorrect(t.arithmetic)}/${t.arithmetic.length}`,
+    training_anagram:     `${countCorrect(t.anagram)}/${t.anagram.length}`,
+    obs_arithmetic:       `${countCorrect(o.arithmetic)}/${o.arithmetic.length}`,
+    obs_proofreading:     `${countCorrect(o.proofreading)}/${o.proofreading.length}`,
+    obs_numbersorting:    `${countCorrect(o.numbersorting)}/${o.numbersorting.length}`,
+    obs_anagram:          `${countCorrect(o.anagram)}/${o.anagram.length}`,
+    obs_wordladder:       `${countCorrect(o.wordladder)}/${o.wordladder.length}`,
+    obs_hiddenword:       `${countCorrect(o.hiddenword)}/${o.hiddenword.length}`,
+    events_count:         o.events.length
+  });
+
   if (window.parent !== window) {
     window.parent.postMessage({
       type: 'experiment_complete',
       participant: results.participant,
       timestamp: results.timestamp,
+      summary:               summary,
       training_arithmetic:  JSON.stringify(results.training.arithmetic),
       training_anagram:     JSON.stringify(results.training.anagram),
       obs_arithmetic:       JSON.stringify(results.observation.arithmetic),
@@ -1407,22 +1421,6 @@ function finalizeAndShowDone() {
   stored.push(results);
   localStorage.setItem('experiment_results', JSON.stringify(stored));
 
-  const countCorrect = arr => arr.filter(r => r.correct).length;
-  const t = results.training, o = results.observation;
-  document.getElementById('final-results-summary').innerHTML = `
-    <p><strong>Participant:</strong> ${results.participant}</p>
-    <hr>
-    <p><strong>Training</strong></p>
-    <p>Arithmetic: ${countCorrect(t.arithmetic)}/${t.arithmetic.length} correct</p>
-    <p>Anagram: ${countCorrect(t.anagram)}/${t.anagram.length} correct</p>
-    <hr>
-    <p><strong>Observation</strong></p>
-    <p>Arithmetic: ${countCorrect(o.arithmetic)}/${o.arithmetic.length} · Proofreading: ${countCorrect(o.proofreading)}/${o.proofreading.length} · Number Sorting: ${countCorrect(o.numbersorting)}/${o.numbersorting.length}</p>
-    <p>Anagram: ${countCorrect(o.anagram)}/${o.anagram.length} · Word Ladder: ${countCorrect(o.wordladder)}/${o.wordladder.length} · Hidden Word: ${countCorrect(o.hiddenword)}/${o.hiddenword.length}</p>
-    <p>Task switches / idle events logged: ${o.events.length}</p>
-    <hr>
-    <p style="font-size:13px; color:#718096;">Results saved. Open <strong>results.html</strong> to view all participants.</p>
-  `;
   showScreen('screen-final-done');
 }
 </script>
