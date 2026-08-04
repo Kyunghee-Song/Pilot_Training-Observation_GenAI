@@ -126,6 +126,7 @@ hr   { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
   width: 70px; padding: 10px; text-align:center;
   font-size: 16px; border: 2px solid #e2e8f0; border-radius: 8px; outline:none;
 }
+.blank-input.wide { width: 160px; text-align:left; }
 .blank-input:focus { border-color: #4299e1; }
 .blank-input:disabled { background: #f7fafc; color: #a0aec0; }
 .num-chip-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
@@ -1120,10 +1121,11 @@ function generateNumberSorting() {
 function renderBlanks(count) {
   const wrap = document.getElementById('obs-blanks');
   wrap.innerHTML = '';
+  const isWide = activeTaskType === 'proofreading'; // words need more room than 3-digit numbers
   for (let i = 0; i < count; i++) {
     const inp = document.createElement('input');
     inp.type = 'text';
-    inp.className = 'blank-input';
+    inp.className = 'blank-input' + (isWide ? ' wide' : '');
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') submitObs(); });
     wrap.appendChild(inp);
   }
