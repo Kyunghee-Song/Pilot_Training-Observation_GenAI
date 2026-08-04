@@ -17,22 +17,22 @@ body {
   display: none;
   background: white;
   border-radius: 12px;
-  padding: 40px 46px;
-  max-width: 1000px;
+  padding: 36px 40px;
+  max-width: 760px;
   width: 92%;
   box-shadow: 0 4px 24px rgba(0,0,0,0.1);
 }
 .screen.active { display: block; }
 
-h1 { font-size: 30px; color: #2d3748; margin-bottom: 8px; }
-h2 { font-size: 23px; color: #2d3748; margin-bottom: 14px; }
+h1 { font-size: 26px; color: #2d3748; margin-bottom: 8px; }
+h2 { font-size: 20px; color: #2d3748; margin-bottom: 14px; }
 p  { color: #4a5568; line-height: 1.6; margin-bottom: 10px; }
 ul { margin: 10px 0 10px 20px; color: #4a5568; line-height: 2.2; }
 
 .btn {
   background: #4299e1; color: white;
   border: none; padding: 12px 28px;
-  border-radius: 8px; font-size: 18px;
+  border-radius: 8px; font-size: 16px;
   cursor: pointer; transition: background 0.2s;
 }
 .btn:hover { background: #3182ce; }
@@ -41,7 +41,7 @@ ul { margin: 10px 0 10px 20px; color: #4a5568; line-height: 2.2; }
 .btn-next {
   background: white; color: #4a5568;
   border: 2px dashed #cbd5e0; padding: 10px 20px;
-  border-radius: 8px; font-size: 17px;
+  border-radius: 8px; font-size: 15px;
   cursor: pointer; transition: all 0.2s;
 }
 .btn-next:hover { border-color: #4299e1; color: #2b6cb0; background: #ebf8ff; }
@@ -52,15 +52,15 @@ ul { margin: 10px 0 10px 20px; color: #4a5568; line-height: 2.2; }
   justify-content: space-between;
   margin-bottom: 6px;
 }
-.phase-label { font-size: 15px; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: .05em; }
-.completed-count { font-size: 15px; color: #718096; }
+.phase-label { font-size: 13px; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: .05em; }
+.completed-count { font-size: 13px; color: #718096; }
 
 .phase-timer-bar-wrap { background: #e2e8f0; border-radius: 4px; height: 8px; margin-bottom: 6px; }
 .phase-timer-bar-fill { height: 100%; border-radius: 4px; transition: width 1s linear; background: #4299e1; }
 .phase-timer-bar-fill.low { background: #e53e3e; }
 
 .phase-timer-display {
-  font-size: 48px; font-weight: 800;
+  font-size: 42px; font-weight: 800;
   text-align: center; margin: 10px 0 18px;
   letter-spacing: 3px; color: #2b6cb0;
 }
@@ -83,12 +83,12 @@ ul { margin: 10px 0 10px 20px; color: #4a5568; line-height: 2.2; }
   position: relative; z-index: 2;
   background: #ebf8ff; border-left: 4px solid #4299e1;
   padding: 20px; border-radius: 8px;
-  font-size: 22px; color: #2d3748; line-height: 1.7;
+  font-size: 19px; color: #2d3748; line-height: 1.7;
 }
 
 .answer-input {
   width: 100%; padding: 12px;
-  font-size: 20px; border: 2px solid #e2e8f0;
+  font-size: 18px; border: 2px solid #e2e8f0;
   border-radius: 8px; outline: none;
   transition: border-color 0.2s; margin-bottom: 12px;
 }
@@ -98,20 +98,20 @@ ul { margin: 10px 0 10px 20px; color: #4a5568; line-height: 2.2; }
 .feedback {
   text-align: center; padding: 11px;
   border-radius: 8px; margin: 10px 0;
-  font-weight: bold; font-size: 18px;
+  font-weight: bold; font-size: 16px;
 }
 .feedback.correct   { background: #c6f6d5; color: #276749; }
 .feedback.incorrect { background: #fed7d7; color: #9b2c2c; }
 .feedback.skipped   { background: #fefcbf; color: #7b6000; }
 
 .center { text-align: center; }
-.big-icon { font-size: 72px; margin-bottom: 14px; }
+.big-icon { font-size: 64px; margin-bottom: 14px; }
 
-label { font-size: 16px; color: #718096; display: block; margin-bottom: 4px; margin-top: 10px; }
+label { font-size: 14px; color: #718096; display: block; margin-bottom: 4px; margin-top: 10px; }
 .text-input {
   width: 100%; padding: 10px;
   border: 2px solid #e2e8f0; border-radius: 8px;
-  font-size: 18px; outline: none; margin-bottom: 14px;
+  font-size: 16px; outline: none; margin-bottom: 14px;
 }
 .text-input:focus { border-color: #4299e1; }
 
@@ -123,15 +123,15 @@ hr   { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
 .results-box p { margin-bottom: 6px; }
 
 .blank-input {
-  width: 78px; padding: 11px; text-align:center;
-  font-size: 18px; border: 2px solid #e2e8f0; border-radius: 8px; outline:none;
+  width: 70px; padding: 10px; text-align:center;
+  font-size: 16px; border: 2px solid #e2e8f0; border-radius: 8px; outline:none;
 }
 .blank-input:focus { border-color: #4299e1; }
 .blank-input:disabled { background: #f7fafc; color: #a0aec0; }
 .num-chip-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
 .num-chip {
   background:#ebf8ff; border:2px solid #90cdf4; border-radius:6px;
-  padding:9px 16px; font-size:19px; font-weight:600; color:#2b6cb0;
+  padding:8px 14px; font-size:17px; font-weight:600; color:#2b6cb0;
 }
 
 /* ── Observation phase ── */
@@ -141,13 +141,13 @@ hr   { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
   flex: 1 1 140px; padding: 10px 12px;
   border: 2px solid #e2e8f0; border-radius: 8px;
   background: white; cursor: pointer; text-align: left;
-  font-size: 15px; font-weight: 600; color: #2d3748;
+  font-size: 13.5px; font-weight: 600; color: #2d3748;
   transition: all .15s;
 }
 .task-type-btn:hover { border-color: #90cdf4; }
 .task-type-btn.active { border-color: #4299e1; background: #ebf8ff; }
 .task-type-btn .cat-tag {
-  display: block; font-size: 11px; font-weight: 700;
+  display: block; font-size: 10px; font-weight: 700;
   text-transform: uppercase; letter-spacing: .06em;
   color: #a0aec0; margin-top: 3px;
 }
@@ -167,7 +167,7 @@ hr   { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
 }
 .queue-mini-card.urgent { background: #fc8181; border-color: #c53030; }
 .queue-count-badge {
-  font-size: 13px; font-weight: 800; color: #4a5568; min-width: 12px;
+  font-size: 12px; font-weight: 800; color: #4a5568; min-width: 12px;
 }
 .queue-count-badge.urgent { color: #e53e3e; }
 
@@ -178,15 +178,15 @@ hr   { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
 .idle-btn {
   background: #faf089; color: #7b6000; border: none;
   padding: 9px 18px; border-radius: 8px; cursor: pointer;
-  font-weight: 700; font-size: 16px;
+  font-weight: 700; font-size: 14px;
 }
 .idle-btn.active { background: #48bb78; color: white; }
 
-.problem-timer-inline { font-size: 16px; font-weight: 700; color: #4a5568; }
+.problem-timer-inline { font-size: 14px; font-weight: 700; color: #4a5568; }
 .problem-timer-inline.negative { color: #e53e3e; }
 
 .idle-overlay { text-align: center; padding: 50px 0; color: #718096; display: none; }
-.idle-overlay .big-icon { font-size: 54px; margin-bottom: 10px; }
+.idle-overlay .big-icon { font-size: 48px; margin-bottom: 10px; }
 
 .ladder-chain-wrap { margin: 10px 0 16px; display: none; }
 .ladder-chain {
@@ -194,11 +194,11 @@ hr   { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
   padding: 12px; background: #f7fafc; border: 1.5px dashed #e2e8f0;
   border-radius: 8px; min-height: 46px;
 }
-.ladder-word { background: #c6f6d5; color: #276749; padding: 7px 13px; border-radius: 6px; font-weight: 700; letter-spacing: 1px; font-size: 17px; }
+.ladder-word { background: #c6f6d5; color: #276749; padding: 6px 12px; border-radius: 6px; font-weight: 700; letter-spacing: 1px; font-size: 15px; }
 .ladder-word.target { background: #bee3f8; color: #2b6cb0; }
-.ladder-arrow { color: #a0aec0; font-size: 17px; }
+.ladder-arrow { color: #a0aec0; font-size: 15px; }
 
-.clue-text { font-size: 17px; color: #4a5568; margin-top: 8px; font-style: italic; }
+.clue-text { font-size: 15px; color: #4a5568; margin-top: 8px; font-style: italic; }
 </style>
 </head>
 <body>
@@ -217,6 +217,17 @@ hr   { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
 
   <label>Name</label>
   <input class="text-input" id="participant-id" placeholder="e.g. Jane Doe" type="text">
+
+  <!-- ⚠ DEMO/REVIEW ONLY — remove this block before deploying to real participants -->
+  <div style="background:#fffbea; border:1.5px dashed #ecc94b; border-radius:8px; padding:12px 14px; margin-top:14px;">
+    <label style="margin-top:0;">Playback Speed (demo only — leave at 1 for real-time)</label>
+    <input class="text-input" id="speed-input" type="number" min="1" max="500" step="1" value="1"
+           style="margin-bottom:4px;">
+    <p style="font-size:12px; color:#a0aec0; margin-bottom:0;">
+      Please leave this at 1 — do not change it unless a research team member
+      specifically asked you to (e.g., for a quick reviewer walkthrough).
+    </p>
+  </div>
 
   <div class="mt">
     <button class="btn" onclick="startSession()">Start Training</button>
@@ -380,7 +391,11 @@ hr   { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
 <script>
   // ── TEST SPEED MULTIPLIER (?speed=30 처럼 URL에 붙이면 배속) ──────────────────
 const urlParams = new URLSearchParams(window.location.search);
-const SPEED = parseFloat(urlParams.get('speed')) || 1;
+let SPEED = parseFloat(urlParams.get('speed')) || 1;
+{
+  const speedInputInit = document.getElementById('speed-input');
+  if (speedInputInit) speedInputInit.value = SPEED;
+}
 // ── PROOFREADING POOL ────────────────────────────────────────────────────────
 
 const PROOFREADING_POOL = [
@@ -540,11 +555,14 @@ let anagAttempts      = 0;
 let problemStart    = 0;   // Date.now() when problem was loaded (training)
 let submitting      = false;
 
-const TASK_TIMER_SECONDS = {
+// TASK_TIMER_SECONDS_BASE holds the real, un-sped-up durations. TASK_TIMER_SECONDS
+// is derived from it via applySpeedToConfigs() so SPEED can change at runtime
+// (from the demo speed-input box), not just once at page load.
+const TASK_TIMER_SECONDS_BASE = {
   arithmetic: 45, proofreading: 45, numbersorting: 45,
   anagram: 90, wordladder: 90, hiddenword: 90
 };
-Object.keys(TASK_TIMER_SECONDS).forEach(k => TASK_TIMER_SECONDS[k] /= SPEED);
+let TASK_TIMER_SECONDS = {};
 const TASK_META = {
   arithmetic:   { label: 'Arithmetic',    category: 'Procedural' },
   proofreading: { label: 'Proofreading',  category: 'Procedural' },
@@ -562,7 +580,7 @@ const ANSWER_PLACEHOLDERS = {
 };
 
 // ── OBSERVATION QUEUE CONFIG (Poisson arrivals, per-task, tune here) ─────────
-const QUEUE_CONFIG = {
+const QUEUE_CONFIG_BASE = {
   arithmetic:    { meanIntervalSec: 60, maxQueue: 8 },
   proofreading:  { meanIntervalSec: 60, maxQueue: 8 },
   numbersorting: { meanIntervalSec: 60, maxQueue: 8 },
@@ -570,7 +588,21 @@ const QUEUE_CONFIG = {
   wordladder:    { meanIntervalSec: 90, maxQueue: 8 },
   hiddenword:    { meanIntervalSec: 90, maxQueue: 8 },
 };
-Object.keys(QUEUE_CONFIG).forEach(k => QUEUE_CONFIG[k].meanIntervalSec /= SPEED);   // ← SPEED로 함께 배속되도록 추가된 줄
+let QUEUE_CONFIG = {};
+
+// Recomputes TASK_TIMER_SECONDS and QUEUE_CONFIG from their _BASE values using
+// the current SPEED. Called once at load (URL ?speed=), and again whenever the
+// demo speed-input box is used, right before the session starts.
+function applySpeedToConfigs() {
+  Object.keys(TASK_TIMER_SECONDS_BASE).forEach(k => {
+    TASK_TIMER_SECONDS[k] = TASK_TIMER_SECONDS_BASE[k] / SPEED;
+  });
+  Object.keys(QUEUE_CONFIG_BASE).forEach(k => {
+    QUEUE_CONFIG[k] = { ...QUEUE_CONFIG_BASE[k], meanIntervalSec: QUEUE_CONFIG_BASE[k].meanIntervalSec / SPEED };
+  });
+}
+applySpeedToConfigs();
+
 const QUEUES_ACCRUE_IN_BACKGROUND = false; // false = only the active task's queue builds up
 
 let queueCounts = { arithmetic:0, proofreading:0, numbersorting:0, anagram:0, wordladder:0, hiddenword:0 };
@@ -741,6 +773,12 @@ function endPhaseTime(prefix) {
 // ── SESSION / TRAINING START ──────────────────────────────────────────────────
 
 function startSession() {
+  const speedInput = document.getElementById('speed-input');
+  const chosenSpeed = speedInput ? parseFloat(speedInput.value) : SPEED;
+  SPEED = (chosenSpeed && chosenSpeed > 0) ? chosenSpeed : 1;
+  applySpeedToConfigs();
+  console.log('Session starting at SPEED =', SPEED);
+
   participantId = document.getElementById('participant-id').value.trim() || 'Unknown';
   results.participant = participantId;
   currentPhaseIdx = 0;
