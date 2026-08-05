@@ -1365,6 +1365,9 @@ function loadLadder() {
 function renderLadderScreen() {
   document.getElementById('obs-feedback').style.display = 'none';
   document.getElementById('obs-next-btn').style.display = 'none';
+  document.getElementById('obs-answer-label').style.display = 'block';
+  document.getElementById('obs-answer').style.display = 'block';
+  document.getElementById('obs-blanks-wrap').style.display = 'none';
   document.getElementById('obs-answer').value    = '';
   document.getElementById('obs-answer').disabled = false;
   document.getElementById('obs-submit-btn').disabled = false;
