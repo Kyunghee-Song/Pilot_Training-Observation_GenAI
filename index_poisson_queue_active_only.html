@@ -621,6 +621,10 @@ let obsAttempts  = 0;
 let ladderChain  = [];
 let isIdle       = false;
 
+// Problems the participant switched away from before finishing. Restored
+// (with whatever they'd typed so far) if they switch back to that task type.
+let parkedProblems = { arithmetic:null, proofreading:null, numbersorting:null, anagram:null, wordladder:null, hiddenword:null };
+
 let obsProblemAccumMs      = 0;
 let obsProblemStart        = 0;
 let obsProblemTimerInterval= null;
@@ -989,6 +993,7 @@ function startObservation() {
   hiddenOrder  = shuffledIndices(HIDDEN_WORD_POOL.length);     hiddenIdx  = 0;
   ladderOrder  = shuffledIndices(WORD_LADDER_POOL.length);     ladderIdx  = 0;
   isIdle = false;
+  parkedProblems = { arithmetic:null, proofreading:null, numbersorting:null, anagram:null, wordladder:null, hiddenword:null };
 
   renderTaskButtons();
   showScreen('screen-observation');
@@ -1046,19 +1051,51 @@ function toggleLadderUI() {
 function selectTaskType(type) {
   if (type === activeTaskType || isIdle) return;
 
-  if (activeTaskType === 'wordladder') {
-    if (ladderChain.length) logLadderResult(false, true);
-  } else if (currentObsProblem) {
-    const isBlanksTask = isBlanksTaskType(activeTaskType);
-    const userRaw = isBlanksTask ? getBlankValues().join(', ') : (document.getElementById('obs-answer').value || '');
-    logObsResult(activeTaskType, userRaw, false, true);
-  }
+  parkCurrentProblem(); // save the in-progress problem instead of abandoning it
 
   logEvent('switch', { from: activeTaskType, to: type });
   activeTaskType = type;
   updateTaskButtons();
   toggleLadderUI();
   loadObsProblem();
+}
+
+// Saves whatever problem/answer/attempts/elapsed-time the participant had in
+// progress on the task they're switching away from, so it can be restored
+// exactly (not re-generated) if they switch back to this task type later.
+function parkCurrentProblem() {
+  stopProblemTimer(); // pauses and accumulates elapsed time, same as idle does
+
+  if (activeTaskType === 'wordladder') {
+    if (currentObsProblem) {
+      parkedProblems.wordladder = {
+        problem: currentObsProblem,
+        ladderChain: [...ladderChain],
+        attempts: obsAttempts,
+        accumMs: obsProblemAccumMs,
+      };
+    }
+  } else if (currentObsProblem) {
+    const isBlanksTask = isBlanksTaskType(activeTaskType);
+    const answerValues = isBlanksTask ? getBlankValues() : [document.getElementById('obs-answer').value || ''];
+    parkedProblems[activeTaskType] = {
+      problem: currentObsProblem,
+      answerValues,
+      attempts: obsAttempts,
+      accumMs: obsProblemAccumMs,
+    };
+  }
+}
+
+// Puts a parked task's saved answer(s) back into the input field(s) after
+// its problem has been restored on screen.
+function restoreAnswerValues(values) {
+  if (isBlanksTaskType(activeTaskType)) {
+    const inputs = document.querySelectorAll('#obs-blanks .blank-input');
+    inputs.forEach((inp, i) => { if (values[i] !== undefined) inp.value = values[i]; });
+  } else {
+    document.getElementById('obs-answer').value = values[0] || '';
+  }
 }
 
 // ── PER-PROBLEM TIMER (Observation only) ──────────────────────────────────────
@@ -1159,6 +1196,20 @@ function loadObsProblem() {
   if (activeTaskType === 'wordladder') { loadLadder(); return; }
 
   submitting  = false;
+
+  const parked = parkedProblems[activeTaskType];
+  if (parked) {
+    parkedProblems[activeTaskType] = null;
+    currentObsProblem = parked.problem;
+    obsAttempts = parked.attempts;
+    renderObsProblem();
+    restoreAnswerValues(parked.answerValues);
+    startProblemTimer();
+    obsProblemAccumMs = parked.accumMs; // resume elapsed time instead of starting fresh
+    tickProblemTimer();
+    return;
+  }
+
   obsAttempts = 0;
 
   let p;
@@ -1287,25 +1338,42 @@ function logObsResult(type, userAnswer, correct, skipped) {
 
 function loadLadder() {
   submitting  = false;
-  obsAttempts = 0;
 
+  const parked = parkedProblems.wordladder;
+  if (parked) {
+    parkedProblems.wordladder = null;
+    currentObsProblem = parked.problem;
+    ladderChain = [...parked.ladderChain];
+    obsAttempts = parked.attempts;
+    renderLadderScreen();
+    startProblemTimer();
+    obsProblemAccumMs = parked.accumMs; // resume elapsed time instead of starting fresh
+    tickProblemTimer();
+    return;
+  }
+
+  obsAttempts = 0;
   const pair = WORD_LADDER_POOL[ladderOrder[ladderIdx % ladderOrder.length]];
   ladderIdx++;
   currentObsProblem = { start: pair.start, target: pair.target };
   ladderChain = [pair.start];
+  renderLadderScreen();
+  startProblemTimer();
+}
 
+// Shared rendering for a word-ladder problem, whether freshly generated or restored from a park.
+function renderLadderScreen() {
   document.getElementById('obs-feedback').style.display = 'none';
   document.getElementById('obs-next-btn').style.display = 'none';
   document.getElementById('obs-answer').value    = '';
   document.getElementById('obs-answer').disabled = false;
   document.getElementById('obs-submit-btn').disabled = false;
   document.getElementById('obs-problem').innerHTML =
-    `Change one letter at a time to turn <strong>${pair.start}</strong> into <strong>${pair.target}</strong>. Every step must be a real word.`;
+    `Change one letter at a time to turn <strong>${currentObsProblem.start}</strong> into <strong>${currentObsProblem.target}</strong>. Every step must be a real word.`;
   document.getElementById('obs-answer').placeholder = 'Type the next word…';
   document.getElementById('obs-completed').textContent = `${obsCompleted.wordladder} completed`;
   renderChain();
   document.getElementById('obs-answer').focus();
-  startProblemTimer();
 }
 
 function renderChain() {
@@ -1425,7 +1493,39 @@ function endObservation() {
     }
   }
 
+  logParkedProblemsAsSkipped();
+
   setTimeout(finalizeAndShowDone, 800);
+}
+
+// Any tasks the participant switched away from and never returned to still
+// need a data record — log each of them as skipped now that the phase is over.
+function logParkedProblemsAsSkipped() {
+  Object.keys(parkedProblems).forEach(type => {
+    const parked = parkedProblems[type];
+    if (!parked) return;
+    const timeSpent = Math.round(parked.accumMs / 1000);
+
+    if (type === 'wordladder') {
+      results.observation.wordladder.push({
+        problem: `${parked.problem.start} → ${parked.problem.target}`,
+        answer: parked.problem.target,
+        chain: parked.ladderChain,
+        correct: false, skipped: true,
+        attempts: parked.attempts, timeSpent
+      });
+    } else {
+      const isBlanksTask = isBlanksTaskType(type);
+      const userAnswer = isBlanksTask ? parked.answerValues.join(', ') : (parked.answerValues[0] || '');
+      const logText = parked.problem.logText || parked.problem.display;
+      const answerVal = parked.problem.answerArr ? parked.problem.answerArr.join(', ') : parked.problem.answer;
+      const entry = { userAnswer, correct: false, skipped: true, attempts: parked.attempts, timeSpent };
+      if (type === 'anagram') { entry.scrambled = logText; entry.answer = answerVal; }
+      else { entry.problem = logText; entry.answer = answerVal; }
+      results.observation[type].push(entry);
+    }
+    parkedProblems[type] = null;
+  });
 }
 
 // ── FINAL SUBMISSION (Qualtrics postMessage + localStorage backup) ───────────
