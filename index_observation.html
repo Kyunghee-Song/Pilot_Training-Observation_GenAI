@@ -794,7 +794,7 @@ function generateProofreading() {
 }
 
 function generateNumberSorting() {
-  const n = 6 + Math.floor(Math.random() * 3); // 6–8 unique numbers
+  const n = 5 + Math.floor(Math.random() * 3); // 5–7 unique numbers
   const set = new Set();
   while (set.size < n) set.add(Math.floor(Math.random() * 900) + 100); // 100–999 (3-digit only)
   const arr = [...set];
@@ -824,14 +824,24 @@ function getBlankValues() {
   return Array.from(document.querySelectorAll('#obs-blanks .blank-input')).map(el => el.value.trim());
 }
 
+// Reveals only ~30% of the letters (always including the first), instead of the
+// pool's old hand-picked patterns which averaged ~68% revealed and were too easy.
+function buildHiddenPattern(word) {
+  const revealCount = Math.max(2, Math.round(word.length * 0.3));
+  const otherPositions = shuffledIndices(word.length - 1).map(i => i + 1); // positions 1..length-1, shuffled, never overlaps with 0
+  const revealSet = new Set([0, ...otherPositions.slice(0, revealCount - 1)]);
+  return word.split('').map((ch, i) => revealSet.has(i) ? ch : '_').join(' ');
+}
+
 function generateHiddenWord() {
   const idx = hiddenOrder[hiddenIdx % hiddenOrder.length];
   hiddenIdx++;
   const p = HIDDEN_WORD_POOL[idx];
+  const pattern = buildHiddenPattern(p.answer);
   return {
-    display: `<strong style="font-size:26px; letter-spacing:4px;">${p.pattern}</strong>` +
+    display: `<strong style="font-size:26px; letter-spacing:4px;">${pattern}</strong>` +
               `<div class="clue-text">Clue: ${p.clue}</div>`,
-    logText: `${p.pattern} (clue: ${p.clue})`,
+    logText: `${pattern} (clue: ${p.clue})`,
     answer: p.answer
   };
 }
