@@ -136,13 +136,7 @@ hr   { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
 }
 
 /* ── Observation phase ── */
-.task-group { margin-bottom: 14px; }
-.task-group-label {
-  font-size: 13px; font-weight: 800; color: #4a5568;
-  text-transform: uppercase; letter-spacing: .07em;
-  margin-bottom: 7px;
-}
-.task-group-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.task-type-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .task-type-btn {
   position: relative;
   flex: 1 1 140px; padding: 10px 12px;
@@ -323,10 +317,10 @@ hr   { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
   <div class="big-icon">🧩</div>
   <h1>Observation Session</h1>
   <p>
-    You have <strong>45 minutes</strong>. Six task types are available — three
-    Procedural (Arithmetic, Proofreading, Number Sorting) and three Diagnostic
-    (Anagram, Word Ladder, Hidden Word). Switch between them freely using the
-    buttons at the top of the screen, at any pace you like.
+    You have <strong>45 minutes</strong>. Six task types are available:
+    Arithmetic, Proofreading, Number Sorting, Anagram, Word Ladder, and
+    Hidden Word. Switch between them freely using the buttons at the top
+    of the screen, at any pace you like.
   </p>
   <p>
     Each problem shows a countdown, but it will not stop you — it keeps
@@ -1015,26 +1009,16 @@ function startObservation() {
 
 function renderTaskButtons() {
   const wrap = document.getElementById('task-type-btns');
-  const groups = [
-    { label: 'Procedural', types: Object.keys(TASK_META).filter(t => TASK_META[t].category === 'Procedural') },
-    { label: 'Diagnostic', types: Object.keys(TASK_META).filter(t => TASK_META[t].category === 'Diagnostic') },
-  ];
-  wrap.innerHTML = groups.map(group => `
-    <div class="task-group">
-      <div class="task-group-label">${group.label}</div>
-      <div class="task-group-row">
-        ${group.types.map(type => {
-          const meta = TASK_META[type];
-          return `<button class="task-type-btn" id="task-btn-${type}" onclick="selectTaskType('${type}')">
-            ${meta.label}
-            <div class="queue-visual">
-              <div class="queue-cards" id="queue-cards-${type}"></div>
-              <span class="queue-count-badge" id="queue-badge-${type}">0</span>
-            </div>
-          </button>`;
-        }).join('')}
+  wrap.innerHTML = Object.keys(TASK_META).map(type => {
+    const meta = TASK_META[type];
+    return `<button class="task-type-btn" id="task-btn-${type}" onclick="selectTaskType('${type}')">
+      ${meta.label}
+      <div class="queue-visual">
+        <div class="queue-cards" id="queue-cards-${type}"></div>
+        <span class="queue-count-badge" id="queue-badge-${type}">0</span>
       </div>
-    </div>`).join('');
+    </button>`;
+  }).join('');
   updateTaskButtons();
 }
 
@@ -1190,8 +1174,9 @@ function generateHiddenWord() {
   hiddenIdx++;
   const p = HIDDEN_WORD_POOL[idx];
   return {
-    display: `<strong style="font-size:26px; letter-spacing:4px;">${p.pattern}</strong>`,
-    logText: p.pattern,
+    display: `<strong style="font-size:26px; letter-spacing:4px;">${p.pattern}</strong>` +
+              `<div class="clue-text">Clue: ${p.clue}</div>`,
+    logText: `${p.pattern} (clue: ${p.clue})`,
     answer: p.answer
   };
 }
