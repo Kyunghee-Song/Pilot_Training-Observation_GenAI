@@ -1074,6 +1074,8 @@ function selectTaskType(type) {
 // progress on the task they're switching away from, so it can be restored
 // exactly (not re-generated) if they switch back to this task type later.
 function parkCurrentProblem() {
+  if (submitting) return; // a correct answer was just submitted and is about to advance to
+                           // a fresh problem — nothing meaningful to park right now
   stopProblemTimer(); // pauses and accumulates elapsed time, same as idle does
 
   if (activeTaskType === 'wordladder') {
@@ -1318,7 +1320,11 @@ function submitObs() {
     if (isBlanksTask) document.querySelectorAll('#obs-blanks .blank-input').forEach(el => el.disabled = true);
     else document.getElementById('obs-answer').disabled = true;
     document.getElementById('obs-submit-btn').disabled = true;
-    setTimeout(() => { if (phaseTimeLeft > 0 && !isIdle) loadObsProblem(); }, 900);
+    const taskAtSubmitTime = activeTaskType;
+    setTimeout(() => {
+      if (phaseTimeLeft > 0 && !isIdle && activeTaskType === taskAtSubmitTime) loadObsProblem();
+      submitting = false;
+    }, 900);
   } else {
     submitting = false;
     document.getElementById('obs-next-btn').style.display = 'inline-block';
@@ -1434,7 +1440,11 @@ function submitLadderStep() {
     obsCompleted.wordladder++;
     input.disabled = true;
     document.getElementById('obs-submit-btn').disabled = true;
-    setTimeout(() => { if (phaseTimeLeft > 0 && !isIdle) loadObsProblem(); }, 900);
+    const taskAtSubmitTime = activeTaskType;
+    setTimeout(() => {
+      if (phaseTimeLeft > 0 && !isIdle && activeTaskType === taskAtSubmitTime) loadObsProblem();
+      submitting = false;
+    }, 900);
   }
 }
 
