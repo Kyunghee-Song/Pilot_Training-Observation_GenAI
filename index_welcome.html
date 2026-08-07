@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Experiment Session</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.screen {
+  display: none;
+  background: white;
+  border-radius: 12px;
+  padding: 36px 40px;
+  max-width: 680px;
+  width: 92%;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+.screen.active { display: block; }
+
+h1 { font-size: 26px; color: #2d3748; margin-bottom: 8px; }
+p  { color: #4a5568; line-height: 1.6; margin-bottom: 10px; }
+ul { margin: 10px 0 10px 20px; color: #4a5568; line-height: 2.2; }
+
+.btn {
+  background: #4299e1; color: white;
+  border: none; padding: 12px 28px;
+  border-radius: 8px; font-size: 16px;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn:hover { background: #3182ce; }
+.btn:disabled { background: #a0aec0; cursor: not-allowed; }
+
+.center { text-align: center; }
+.big-icon { font-size: 64px; margin-bottom: 14px; }
+
+label { font-size: 14px; color: #718096; display: block; margin-bottom: 4px; margin-top: 10px; }
+.text-input {
+  width: 100%; padding: 10px;
+  border: 2px solid #e2e8f0; border-radius: 8px;
+  font-size: 16px; outline: none; margin-bottom: 14px;
+}
+.text-input:focus { border-color: #4299e1; }
+
+.mt  { margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<!-- ══════ SCREEN: Welcome ══════ -->
+<div id="screen-welcome" class="screen active">
+  <h1>Experiment Session</h1>
+  <p>Welcome! You will complete two parts today:</p>
+  <ul>
+    <li><strong>Training</strong> — Multi-digit Arithmetic (10 min), then Anagram (15 min)</li>
+    <li><strong>Observation</strong> — 45 minutes, six task types, switch freely between them</li>
+  </ul>
+  <p style="margin-top:8px; color:#e53e3e; font-weight:600;">
+    ⚠ Do NOT copy and paste — type all answers manually.
+  </p>
+  <p style="margin-top:10px; color:#4a5568; font-weight:600; background:#f7fafc; border:1.5px dashed #cbd5e0; border-radius:8px; padding:10px 14px;">
+    ✏️ Please have paper and a pencil ready before you begin — some tasks
+    (like multi-digit arithmetic or sorting numbers) may be hard to solve in
+    your head alone.
+  </p>
+  <p style="margin-top:8px; color:#2b6cb0; font-weight:600;">
+    ℹ️ Note: there's no break/idle option during Training, but you'll be able to
+    take breaks during Observation. We'll remind you about this again right
+    before the Observation phase begins.
+  </p>
+
+  <label>Name</label>
+  <input class="text-input" id="participant-id" placeholder="e.g. Jane Doe" type="text">
+
+  <!-- ⚠ DEMO/REVIEW ONLY — remove this block before deploying to real participants -->
+  <div style="background:#fffbea; border:1.5px dashed #ecc94b; border-radius:8px; padding:12px 14px; margin-top:14px;">
+    <label style="margin-top:0;">Playback Speed (demo only — leave at 1 for real-time)</label>
+    <input class="text-input" id="speed-input" type="number" min="1" max="500" step="1" value="1"
+           style="margin-bottom:4px;">
+    <p style="font-size:12px; color:#a0aec0; margin-bottom:0;">
+      Please leave this at 1 — do not change it unless a research team member
+      specifically asked you to (e.g., for a quick reviewer walkthrough). This
+      setting will carry through automatically to Training and Observation.
+    </p>
+  </div>
+
+  <div class="mt">
+    <button class="btn" onclick="startSession()">Start Training</button>
+  </div>
+</div>
+
+<!-- ══════ SCREEN: Done (waiting for Next) ══════ -->
+<div id="screen-welcome-done" class="screen center">
+  <div class="big-icon">👋</div>
+  <h1>Thanks!</h1>
+  <p>Please click <strong>Next</strong> below to begin Training.</p>
+</div>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+let SPEED = parseFloat(urlParams.get('speed')) || 1;
+{
+  const speedInputInit = document.getElementById('speed-input');
+  if (speedInputInit) speedInputInit.value = SPEED;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startSession() {
+  const speedInput = document.getElementById('speed-input');
+  const chosenSpeed = speedInput ? parseFloat(speedInput.value) : SPEED;
+  SPEED = (chosenSpeed && chosenSpeed > 0) ? chosenSpeed : 1;
+
+  const participantId = document.getElementById('participant-id').value.trim() || 'Unknown';
+
+  if (window.parent !== window) {
+    window.parent.postMessage({
+      type: 'welcome_complete',
+      participant: participantId,
+      speed: SPEED
+    }, '*');
+  } else {
+    console.log('welcome_complete (standalone, no parent window):', { participant: participantId, speed: SPEED });
+  }
+
+  showScreen('screen-welcome-done');
+}
+</script>
+</body>
+</html>

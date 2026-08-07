@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Training Session</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.screen {
+  display: none;
+  background: white;
+  border-radius: 12px;
+  padding: 36px 40px;
+  max-width: 680px;
+  width: 92%;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+.screen.active { display: block; }
+
+h1 { font-size: 26px; color: #2d3748; margin-bottom: 8px; }
+h2 { font-size: 20px; color: #2d3748; margin-bottom: 14px; }
+p  { color: #4a5568; line-height: 1.6; margin-bottom: 10px; }
+
+.btn {
+  background: #4299e1; color: white;
+  border: none; padding: 12px 28px;
+  border-radius: 8px; font-size: 16px;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn:hover { background: #3182ce; }
+.btn:disabled { background: #a0aec0; cursor: not-allowed; }
+
+.btn-next {
+  background: white; color: #4a5568;
+  border: 2px dashed #cbd5e0; padding: 10px 20px;
+  border-radius: 8px; font-size: 15px;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-next:hover { border-color: #4299e1; color: #2b6cb0; background: #ebf8ff; }
+
+/* ── Phase timer bar ── */
+.phase-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.phase-label { font-size: 13px; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: .05em; }
+.completed-count { font-size: 13px; color: #718096; }
+
+.phase-timer-bar-wrap { background: #e2e8f0; border-radius: 4px; height: 8px; margin-bottom: 6px; }
+.phase-timer-bar-fill { height: 100%; border-radius: 4px; transition: width 1s linear; background: #4299e1; }
+.phase-timer-bar-fill.low { background: #e53e3e; }
+
+.phase-timer-display {
+  font-size: 42px; font-weight: 800;
+  text-align: center; margin: 10px 0 18px;
+  letter-spacing: 3px; color: #2b6cb0;
+}
+.phase-timer-display.warning { color: #e53e3e; animation: pulse .7s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.55} }
+
+/* Problem stack (card pile effect) */
+.problem-stack { position: relative; margin-bottom: 28px; }
+.problem-stack::after {
+  content: ''; position: absolute; inset: 0;
+  background: #bee3f8; border-left: 4px solid #76c2ff;
+  border-radius: 8px; transform: translate(10px, 10px); z-index: 0;
+}
+.problem-stack::before {
+  content: ''; position: absolute; inset: 0;
+  background: #cfe8ff; border-left: 4px solid #90cdf4;
+  border-radius: 8px; transform: translate(5px, 5px); z-index: 1;
+}
+.problem-box {
+  position: relative; z-index: 2;
+  background: #ebf8ff; border-left: 4px solid #4299e1;
+  padding: 20px; border-radius: 8px;
+  font-size: 19px; color: #2d3748; line-height: 1.7;
+}
+
+.answer-input {
+  width: 100%; padding: 12px;
+  font-size: 18px; border: 2px solid #e2e8f0;
+  border-radius: 8px; outline: none;
+  transition: border-color 0.2s; margin-bottom: 12px;
+}
+.answer-input:focus  { border-color: #4299e1; }
+.answer-input:disabled { background: #f7fafc; color: #a0aec0; }
+
+.feedback {
+  text-align: center; padding: 11px;
+  border-radius: 8px; margin: 10px 0;
+  font-weight: bold; font-size: 16px;
+}
+.feedback.correct   { background: #c6f6d5; color: #276749; }
+.feedback.incorrect { background: #fed7d7; color: #9b2c2c; }
+.feedback.skipped   { background: #fefcbf; color: #7b6000; }
+
+.center { text-align: center; }
+.big-icon { font-size: 64px; margin-bottom: 14px; }
+
+label { font-size: 14px; color: #718096; display: block; margin-bottom: 4px; margin-top: 10px; }
+
+.mt  { margin-top: 20px; }
+.mt2 { margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ══════ SCREEN: Phase Intro ══════ -->
+<div id="screen-phase-intro" class="screen center active">
+  <div class="big-icon" id="phase-intro-icon">📊</div>
+  <h1 id="phase-intro-title"></h1>
+  <p id="phase-intro-desc"></p>
+  <div class="mt">
+    <button class="btn" onclick="startPhase()">Begin</button>
+  </div>
+</div>
+
+<!-- ══════ SCREEN: Arithmetic Task (Training) ══════ -->
+<div id="screen-arithmetic" class="screen">
+  <div class="phase-header">
+    <span class="phase-label">🔢 Arithmetic — Phase Timer</span>
+    <span class="completed-count" id="arith-completed">0 completed</span>
+  </div>
+  <div class="phase-timer-bar-wrap"><div class="phase-timer-bar-fill" id="arith-bar" style="width:100%"></div></div>
+  <div class="phase-timer-display" id="arith-timer">10:00</div>
+
+  <div class="problem-stack"><div class="problem-box" id="arith-problem"></div></div>
+
+  <label>Your Answer:</label>
+  <input class="answer-input" id="arith-answer" type="text" placeholder="Type your answer…"
+         onkeydown="if(event.key==='Enter') submitArith()">
+
+  <div class="feedback" id="arith-feedback" style="display:none"></div>
+
+  <div class="mt2" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+    <button class="btn" id="arith-submit-btn" onclick="submitArith()">Submit</button>
+    <button class="btn-next" id="arith-next-btn" onclick="moveOnArith()" style="display:none">
+      You can move on to next if you want
+    </button>
+  </div>
+</div>
+
+<!-- ══════ SCREEN: Anagram Task (Training) ══════ -->
+<div id="screen-anagram" class="screen">
+  <div class="phase-header">
+    <span class="phase-label">🔤 Anagram — Phase Timer</span>
+    <span class="completed-count" id="anag-completed">0 completed</span>
+  </div>
+  <div class="phase-timer-bar-wrap"><div class="phase-timer-bar-fill" id="anag-bar" style="width:100%"></div></div>
+  <div class="phase-timer-display" id="anag-timer">15:00</div>
+
+  <div class="problem-stack"><div class="problem-box" id="anag-problem"></div></div>
+
+  <label>Your Answer (unscrambled word):</label>
+  <input class="answer-input" id="anag-answer" type="text" placeholder="Type the word…"
+         onkeydown="if(event.key==='Enter') submitAnagram()">
+
+  <div class="feedback" id="anag-feedback" style="display:none"></div>
+
+  <div class="mt2" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+    <button class="btn" id="anag-submit-btn" onclick="submitAnagram()">Submit</button>
+    <button class="btn-next" id="anag-next-btn" onclick="moveOnAnagram()" style="display:none">
+      You can move on to next if you want
+    </button>
+  </div>
+</div>
+
+<!-- ══════ SCREEN: Between Training Phases ══════ -->
+<div id="screen-between" class="screen center">
+  <div class="big-icon">✅</div>
+  <h2 id="between-title"></h2>
+  <p id="between-desc"></p>
+  <p id="between-next" style="font-weight:600; color:#2d3748;"></p>
+  <div class="mt"><button class="btn" onclick="startNextPhase()">Start Next Phase</button></div>
+</div>
+
+<!-- ══════ SCREEN: Training Complete ══════ -->
+<div id="screen-training-complete" class="screen center">
+  <div class="big-icon">🎉</div>
+  <h1>Training Complete!</h1>
+  <p id="training-complete-desc"></p>
+  <p style="font-weight:600; color:#2d3748;">Please click <strong>Next</strong> below to continue.</p>
+</div>
+
+<script src="anagram_pools.js"></script>
+<script>
+// Participant name and playback speed are passed in from the Welcome question
+// via URL parameters (piped text in the Qualtrics iframe src) — not re-entered here.
+const urlParams = new URLSearchParams(window.location.search);
+let SPEED = parseFloat(urlParams.get('speed')) || 1;
+const participantFromUrl = decodeURIComponent(urlParams.get('participant') || 'Unknown');
+
+// ── ARITHMETIC GENERATOR ──────────────────────────────────────────────────────
+
+function generateArithProblem() {
+  const use3 = Math.random() < 0.3;
+  const rand = () => Math.floor(Math.random() * 888) + 12; // 12–899
+
+  const nums = [rand(), rand()];
+  const ops  = [Math.random() < 0.6 ? '+' : '-'];
+  if (use3) { nums.push(rand()); ops.push(Math.random() < 0.6 ? '+' : '-'); }
+
+  let result = nums[0];
+  for (let i = 0; i < ops.length; i++) {
+    result = ops[i] === '+' ? result + nums[i+1] : result - nums[i+1];
+  }
+  if (result <= 0) return generateArithProblem(); // retry until positive
+
+  let q = nums[0].toLocaleString();
+  for (let i = 0; i < ops.length; i++) q += ` ${ops[i]} ${nums[i+1].toLocaleString()}`;
+  q += ' = ?';
+
+  return { q, result };
+}
+
+function scramble(word) {
+  const arr = word.split('');
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  const result = arr.join('');
+  return result === word ? scramble(word) : result;
+}
+
+function shuffledIndices(n) {
+  const arr = Array.from({ length: n }, (_, i) => i);
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+
+const phases         = ['arithmetic','anagram'];
+let currentPhaseIdx = 0;
+
+let phaseInterval   = null;
+let phaseTimeLeft   = 0;
+let phaseDuration   = 0;
+
+let arithCompleted    = 0;
+let anagCompleted     = 0;
+let anagIdx           = 0;
+let trainingAnagOrder = [];
+let currentArith      = null;
+let currentScrambled  = '';
+let arithAttempts     = 0;
+let anagAttempts      = 0;
+
+let problemStart    = 0;   // Date.now() when problem was loaded
+let submitting      = false;
+
+const results = {
+  participant: participantFromUrl, timestamp: '',
+  training: { arithmetic: [], anagram: [] }
+};
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function norm(s) { return s.replace(/[,\s]/g, '').toLowerCase(); }
+
+document.addEventListener('paste', e => e.preventDefault());
+document.addEventListener('contextmenu', e => { if (e.target.tagName === 'INPUT') e.preventDefault(); });
+
+// ── PHASE-WIDE TIMER ──────────────────────────────────────────────────────────
+
+function startPhaseTimer(prefix, seconds) {
+  phaseDuration = seconds;
+  phaseTimeLeft = seconds;
+  updatePhaseTimer(prefix);
+  phaseInterval = setInterval(() => {
+    phaseTimeLeft--;
+    updatePhaseTimer(prefix);
+    if (phaseTimeLeft <= 0) {
+      clearInterval(phaseInterval);
+      endPhaseTime(prefix);
+    }
+  }, 1000);
+}
+
+function updatePhaseTimer(prefix) {
+  const m   = Math.floor(phaseTimeLeft / 60);
+  const s   = phaseTimeLeft % 60;
+  const el  = document.getElementById(`${prefix}-timer`);
+  const bar = document.getElementById(`${prefix}-bar`);
+  el.textContent = `${m}:${String(s).padStart(2,'0')}`;
+  el.className   = `phase-timer-display ${phaseTimeLeft <= 60 ? 'warning' : ''}`;
+  const pct = (phaseTimeLeft / phaseDuration) * 100;
+  bar.style.width = pct + '%';
+  bar.classList.toggle('low', phaseTimeLeft <= 60);
+}
+
+function endPhaseTime(prefix) {
+  const answerEl = document.getElementById(`${prefix}-answer`);
+  const submitEl = document.getElementById(`${prefix}-submit-btn`);
+  if (answerEl) answerEl.disabled = true;
+  if (submitEl) submitEl.disabled = true;
+
+  if (prefix === 'arith' && currentArith) {
+    results.training.arithmetic.push({
+      problem: currentArith.q, userAnswer: '', correct: false, skipped: true,
+      attempts: arithAttempts, timeSpent: Math.round((Date.now() - problemStart) / 1000)
+    });
+  } else if (prefix === 'anag') {
+    const word = ANAGRAMS_TRAINING[trainingAnagOrder[anagIdx % trainingAnagOrder.length]];
+    results.training.anagram.push({
+      scrambled: currentScrambled, answer: word, userAnswer: '', correct: false, skipped: true,
+      attempts: anagAttempts, timeSpent: Math.round((Date.now() - problemStart) / 1000)
+    });
+  }
+
+  setTimeout(phaseComplete, 800);
+}
+
+// ── SESSION / TRAINING START ──────────────────────────────────────────────────
+
+showPhaseIntro(phases[0], 1); // starts immediately — name/speed already captured on the Welcome page
+
+function showPhaseIntro(phase, num) {
+  if (phase === 'arithmetic') {
+    document.getElementById('phase-intro-icon').textContent  = '🔢';
+    document.getElementById('phase-intro-title').textContent = `Phase ${num}: Multi-digit Arithmetic`;
+    document.getElementById('phase-intro-desc').textContent  =
+      'Solve as many problems as you can in 10 minutes. ' +
+      'Problems appear one at a time — submit your answer and the next one loads immediately. ' +
+      'Do NOT copy/paste — type everything manually.';
+  } else {
+    document.getElementById('phase-intro-icon').textContent  = '🔤';
+    document.getElementById('phase-intro-title').textContent = `Phase ${num}: Anagram`;
+    document.getElementById('phase-intro-desc').textContent  =
+      'Unscramble as many words as you can in 15 minutes. ' +
+      'Do NOT copy/paste — type everything manually.';
+  }
+  showScreen('screen-phase-intro');
+}
+
+function startPhase() {
+  const phase = phases[currentPhaseIdx];
+  if (phase === 'arithmetic') {
+    arithCompleted = 0;
+    showScreen('screen-arithmetic');
+    loadArith();
+    startPhaseTimer('arith', 10 * 60 / SPEED);
+  } else {
+    anagCompleted = 0;
+    anagIdx = 0;
+    trainingAnagOrder = shuffledIndices(ANAGRAMS_TRAINING.length);
+    showScreen('screen-anagram');
+    loadAnagram();
+    startPhaseTimer('anag', 15 * 60 / SPEED);
+  }
+}
+
+// ── ARITHMETIC (Training) ─────────────────────────────────────────────────────
+
+function loadArith() {
+  submitting    = false;
+  arithAttempts = 0;
+  currentArith  = generateArithProblem();
+  problemStart  = Date.now();
+
+  document.getElementById('arith-feedback').style.display = 'none';
+  document.getElementById('arith-next-btn').style.display = 'none';
+  document.getElementById('arith-answer').value    = '';
+  document.getElementById('arith-answer').disabled = false;
+  document.getElementById('arith-submit-btn').disabled = false;
+  document.getElementById('arith-problem').textContent = currentArith.q;
+  document.getElementById('arith-completed').textContent = `${arithCompleted} completed`;
+  document.getElementById('arith-answer').focus();
+}
+
+function submitArith() {
+  if (submitting) return;
+  const input = document.getElementById('arith-answer');
+  if (input.disabled || !input.value.trim()) return;
+
+  submitting = true;
+  arithAttempts++;
+  const user = norm(input.value);
+  const ok   = user === String(currentArith.result) || user === norm(currentArith.result.toLocaleString());
+
+  showFeedback('arith', ok);
+
+  if (ok) {
+    const timeSpent = Math.round((Date.now() - problemStart) / 1000);
+    results.training.arithmetic.push({
+      problem: currentArith.q, userAnswer: input.value,
+      correct: true, skipped: false, attempts: arithAttempts, timeSpent
+    });
+    input.disabled = true;
+    document.getElementById('arith-submit-btn').disabled = true;
+    arithCompleted++;
+    setTimeout(() => { if (phaseTimeLeft > 0) loadArith(); }, 900);
+  } else {
+    submitting = false;
+    document.getElementById('arith-next-btn').style.display = 'inline-block';
+  }
+}
+
+function moveOnArith() {
+  const input = document.getElementById('arith-answer');
+  const timeSpent = Math.round((Date.now() - problemStart) / 1000);
+  results.training.arithmetic.push({
+    problem: currentArith.q, userAnswer: input.value,
+    correct: false, skipped: false, attempts: arithAttempts, timeSpent
+  });
+  if (phaseTimeLeft > 0) loadArith();
+}
+
+// ── ANAGRAM (Training) ────────────────────────────────────────────────────────
+
+function loadAnagram() {
+  submitting   = false;
+  anagAttempts = 0;
+  problemStart = Date.now();
+
+  const word = ANAGRAMS_TRAINING[trainingAnagOrder[anagIdx % trainingAnagOrder.length]];
+  currentScrambled = scramble(word);
+  document.getElementById('anag-feedback').style.display = 'none';
+  document.getElementById('anag-next-btn').style.display = 'none';
+  document.getElementById('anag-answer').value    = '';
+  document.getElementById('anag-answer').disabled = false;
+  document.getElementById('anag-submit-btn').disabled = false;
+  document.getElementById('anag-problem').innerHTML =
+    `Unscramble the letters to form a word:<br>
+     <strong style="font-size:28px; letter-spacing:5px;">${currentScrambled}</strong>`;
+  document.getElementById('anag-completed').textContent = `${anagCompleted} completed`;
+  document.getElementById('anag-answer').focus();
+}
+
+function submitAnagram() {
+  if (submitting) return;
+  const input = document.getElementById('anag-answer');
+  if (input.disabled || !input.value.trim()) return;
+
+  submitting = true;
+  anagAttempts++;
+  const word = ANAGRAMS_TRAINING[trainingAnagOrder[anagIdx % trainingAnagOrder.length]];
+  const user = input.value.trim().toUpperCase();
+  const ok   = user === word;
+
+  showFeedback('anag', ok);
+
+  if (ok) {
+    const timeSpent = Math.round((Date.now() - problemStart) / 1000);
+    results.training.anagram.push({
+      scrambled: currentScrambled, answer: word,
+      userAnswer: input.value, correct: true, skipped: false,
+      attempts: anagAttempts, timeSpent
+    });
+    input.disabled = true;
+    document.getElementById('anag-submit-btn').disabled = true;
+    anagCompleted++;
+    setTimeout(() => { if (phaseTimeLeft > 0) { anagIdx++; loadAnagram(); } }, 900);
+  } else {
+    submitting = false;
+    document.getElementById('anag-next-btn').style.display = 'inline-block';
+  }
+}
+
+function moveOnAnagram() {
+  const input = document.getElementById('anag-answer');
+  const word  = ANAGRAMS_TRAINING[trainingAnagOrder[anagIdx % trainingAnagOrder.length]];
+  const timeSpent = Math.round((Date.now() - problemStart) / 1000);
+  results.training.anagram.push({
+    scrambled: currentScrambled, answer: word,
+    userAnswer: input.value, correct: false, skipped: false,
+    attempts: anagAttempts, timeSpent
+  });
+  if (phaseTimeLeft > 0) { anagIdx++; loadAnagram(); }
+}
+
+// ── FEEDBACK ───────────────────────────────────────────────────────────────────
+
+function showFeedback(prefix, ok) {
+  const fb = document.getElementById(`${prefix}-feedback`);
+  fb.style.display = 'block';
+  if (ok) { fb.className = 'feedback correct'; fb.textContent = '✓ Correct!'; }
+  else    { fb.className = 'feedback incorrect'; fb.textContent = '✗ Incorrect.'; }
+}
+
+// ── BETWEEN TRAINING PHASES ────────────────────────────────────────────────────
+
+function phaseComplete() {
+  clearInterval(phaseInterval);
+  currentPhaseIdx++;
+  if (currentPhaseIdx >= phases.length) { showTrainingComplete(); return; }
+
+  const done = phases[currentPhaseIdx - 1];
+  const next = phases[currentPhaseIdx];
+  document.getElementById('between-title').textContent = `Phase ${currentPhaseIdx} Complete!`;
+  document.getElementById('between-desc').textContent  =
+    done === 'arithmetic'
+      ? `You completed ${arithCompleted} arithmetic problem(s). Great work!`
+      : `You completed ${anagCompleted} anagram(s). Great work!`;
+  document.getElementById('between-next').textContent  =
+    'Next: ' + (next === 'arithmetic' ? 'Multi-digit Arithmetic — 10 minutes' : 'Anagram — 15 minutes');
+  showScreen('screen-between');
+}
+
+function startNextPhase() { showPhaseIntro(phases[currentPhaseIdx], currentPhaseIdx + 1); }
+
+function showTrainingComplete() {
+  clearInterval(phaseInterval);
+  const aC = results.training.arithmetic.filter(r => r.correct).length;
+  const nC = results.training.anagram.filter(r => r.correct).length;
+  document.getElementById('training-complete-desc').textContent =
+    `Arithmetic: ${aC}/${results.training.arithmetic.length} correct. Anagram: ${nC}/${results.training.anagram.length} correct.`;
+  showScreen('screen-training-complete');
+  finalizeTrainingAndShowDone();
+}
+
+// ── FINAL SUBMISSION (Qualtrics postMessage) ──────────────────────────────────
+
+function finalizeTrainingAndShowDone() {
+  results.timestamp = new Date().toISOString();
+
+  const countCorrect = arr => arr.filter(r => r.correct).length;
+  const t = results.training;
+  const train_summary = JSON.stringify({
+    training_arithmetic: `${countCorrect(t.arithmetic)}/${t.arithmetic.length}`,
+    training_anagram:    `${countCorrect(t.anagram)}/${t.anagram.length}`
+  });
+
+  if (window.parent !== window) {
+    window.parent.postMessage({
+      type: 'training_complete',
+      participant: results.participant,
+      timestamp: results.timestamp,
+      train_summary:        train_summary,
+      training_arithmetic:  JSON.stringify(results.training.arithmetic),
+      training_anagram:     JSON.stringify(results.training.anagram)
+    }, '*');
+  } else {
+    console.log('training_complete (standalone, no parent window):', results);
+  }
+}
+</script>
+</body>
+</html>
