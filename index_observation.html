@@ -827,7 +827,8 @@ function getBlankValues() {
 // Reveals only ~30% of the letters (always including the first), instead of the
 // pool's old hand-picked patterns which averaged ~68% revealed and were too easy.
 function buildHiddenPattern(word) {
-  const revealCount = Math.max(2, Math.round(word.length * 0.3));
+  const ratio = 0.45 + Math.random() * 0.05; // 45–50% of letters revealed
+  const revealCount = Math.max(2, Math.round(word.length * ratio));
   const otherPositions = shuffledIndices(word.length - 1).map(i => i + 1); // positions 1..length-1, shuffled, never overlaps with 0
   const revealSet = new Set([0, ...otherPositions.slice(0, revealCount - 1)]);
   return word.split('').map((ch, i) => revealSet.has(i) ? ch : '_').join(' ');
