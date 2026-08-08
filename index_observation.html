@@ -294,8 +294,8 @@ const participantFromUrl = decodeURIComponent(urlParams.get('participant') || 'U
 // ── PROOFREADING POOL ────────────────────────────────────────────────────────
 
 const PROOFREADING_POOL = [
-  { text: "The quikc brown fox jumps ovr the lasy dog. It waz a butiful day in the forrest.",
-    corrections: ["quick","over","lazy","was","beautiful","forest"] },
+  { text: "The quikc brown fox jumps ovr the lasy dog. It was a butiful day in the forest.",
+    corrections: ["quick","over","lazy","beautiful"] },
   { text: "She recieved a letter form her freind yesterday and was very hapy about it.",
     corrections: ["received","from","friend","happy"] },
   { text: "The childrens were playng in the park wile their parents watched clossely.",
@@ -304,26 +304,66 @@ const PROOFREADING_POOL = [
     corrections: ["definitely","achieve","before","year"] },
   { text: "The resturant served delicous food but the servise was quiet slow.",
     corrections: ["restaurant","delicious","service","quite"] },
-  { text: "Our teecher explaned the lesson clearley so evryone could understnd it.",
-    corrections: ["teacher","explained","clearly","everyone","understand"] },
-  { text: "The compny annouced a new prduct that will be availble next munth.",
-    corrections: ["company","announced","product","available","month"] },
-  { text: "I beleive that hard work and paitence are the keys to sucess.",
-    corrections: ["believe","patience","success"] },
+  { text: "Our teecher explaned the lesson clearley so evryone could understand it.",
+    corrections: ["teacher","explained","clearly","everyone"] },
+  { text: "The compny annouced a new prduct that will be availble next month.",
+    corrections: ["company","announced","product","available"] },
+  { text: "I beleive that hard wrok and paitence are the keys to sucess.",
+    corrections: ["believe","work","patience","success"] },
   { text: "The mountian trail was steap and the weathr turned cold sudenly.",
     corrections: ["mountain","steep","weather","suddenly"] },
   { text: "She wisperd a secrat to her sister durring the boring meting.",
     corrections: ["whispered","secret","during","meeting"] },
-  { text: "The scientest discoverd a new speceis of buttefly in the rainforrest.",
-    corrections: ["scientist","discovered","species","butterfly","rainforest"] },
+  { text: "The scientest discoverd a new speceis of buttefly in the rainforest.",
+    corrections: ["scientist","discovered","species","butterfly"] },
   { text: "He forgott his umbrela and got compleatly soked in the rain.",
     corrections: ["forgot","umbrella","completely","soaked"] },
   { text: "The librery was qiuet exept for the sond of turning pages.",
     corrections: ["library","quiet","except","sound"] },
-  { text: "Their vacaton to the mountins was realy relaxxing and peacefull.",
-    corrections: ["vacation","mountains","really","relaxing","peaceful"] },
-  { text: "The ancient castel had tall towres and a deap moat around it.",
-    corrections: ["castle","towers","deep"] },
+  { text: "Their vacaton to the mountins was realy relaxxing and peaceful.",
+    corrections: ["vacation","mountains","really","relaxing"] },
+  { text: "The ancient castel had tall towres and a deap moat arround it.",
+    corrections: ["castle","towers","deep","around"] },
+  { text: "The famly went on a picnik near the lake and enjoied the warm sunshien all afternoon.",
+    corrections: ["family","picnic","enjoyed","sunshine"] },
+  { text: "He quikly relized that he had forgoten his keys inside the houes.",
+    corrections: ["quickly","realized","forgotten","house"] },
+  { text: "The teatcher gave us homwork about the histroy of anicent Egypt.",
+    corrections: ["teacher","homework","history","ancient"] },
+  { text: "My favorit seson is autum becuase the leaves change color so beautifully.",
+    corrections: ["favorite","season","autumn","because"] },
+  { text: "The docter told her patiant to reast and drink pleny of water.",
+    corrections: ["doctor","patient","rest","plenty"] },
+  { text: "We watchd a facinating documentery about wildlif in Africa.",
+    corrections: ["watched","fascinating","documentary","wildlife"] },
+  { text: "The chef carefuly prepaired a delicous meal for the imprtant guests.",
+    corrections: ["carefully","prepared","delicious","important"] },
+  { text: "The importent thing is to excercise regulary to stay healty and strong.",
+    corrections: ["important","exercise","regularly","healthy"] },
+  { text: "The musicain played a beatiful melady on his old violen.",
+    corrections: ["musician","beautiful","melody","violin"] },
+  { text: "She was extremly nervus befor her big interveiw yesterday.",
+    corrections: ["extremely","nervous","before","interview"] },
+  { text: "The farmr plantd seeds in the feild early in the mornin.",
+    corrections: ["farmer","planted","field","morning"] },
+  { text: "They celbrated their aniversary at a fancy restarant downtwon.",
+    corrections: ["celebrated","anniversary","restaurant","downtown"] },
+  { text: "The studnts were exicted to lern about the solr system in class.",
+    corrections: ["students","excited","learn","solar"] },
+  { text: "He acidentaly droped his phone and craked the screan.",
+    corrections: ["accidentally","dropped","cracked","screen"] },
+  { text: "The compny annouced that they woud release a new prduct next year.",
+    corrections: ["company","announced","would","product"] },
+  { text: "Her grandmothr told storys about growing up in a smal vilage.",
+    corrections: ["grandmother","stories","small","village"] },
+  { text: "The athelete trained everey day to prepear for the upcomming competition.",
+    corrections: ["athlete","every","prepare","upcoming"] },
+  { text: "We were suprised to see how mch the city had chanded over the yeers.",
+    corrections: ["surprised","much","changed","years"] },
+  { text: "The engeneer desined a brige that could withstnd strong winds.",
+    corrections: ["engineer","designed","bridge","withstand"] },
+  { text: "I recieved an invtation to my freinds weding next month.",
+    corrections: ["received","invitation","friends","wedding"] },
 ];
 
 // ── HIDDEN WORD POOL ─────────────────────────────────────────────────────────
@@ -354,40 +394,102 @@ const HIDDEN_WORD_POOL = [
   { pattern: "Z E _ R _", clue: "a striped African animal related to the horse", answer: "ZEBRA" },
   { pattern: "C A C _ U _", clue: "a spiky desert plant", answer: "CACTUS" },
   { pattern: "D O L _ H _ N", clue: "an intelligent marine mammal known for jumping", answer: "DOLPHIN" },
+  { clue: "a large gray mammal with a long trunk", answer: "ELEPHANT" },
+  { clue: "a sea creature with eight arms", answer: "OCTOPUS" },
+  { clue: "an insect known for its colorful wings", answer: "BUTTERFLY" },
+  { clue: "a very tall natural landform", answer: "MOUNTAIN" },
+  { clue: "shows the days, weeks, and months of the year", answer: "CALENDAR" },
+  { clue: "a two-wheeled vehicle you pedal", answer: "BICYCLE" },
+  { clue: "a sweet treat made from cacao beans", answer: "CHOCOLATE" },
+  { clue: "a place where sick people are treated", answer: "HOSPITAL" },
+  { clue: "used to type on a computer", answer: "KEYBOARD" },
+  { clue: "a portable light you can carry", answer: "LANTERN" },
+  { clue: "an object that attracts metal", answer: "MAGNET" },
+  { clue: "used for writing down notes", answer: "NOTEBOOK" },
+  { clue: "a large group of musicians playing together", answer: "ORCHESTRA" },
+  { clue: "a document needed to travel internationally", answer: "PASSPORT" },
+  { clue: "instructions for cooking a dish", answer: "RECIPE" },
+  { clue: "an object that orbits a planet", answer: "SATELLITE" },
+  { clue: "a violent spinning windstorm", answer: "TORNADO" },
+  { clue: "everything that exists in space", answer: "UNIVERSE" },
+  { clue: "a small community in the countryside", answer: "VILLAGE" },
+  { clue: "water falling from a height", answer: "WATERFALL" },
+  { clue: "the set of letters used in writing", answer: "ALPHABET" },
+  { clue: "a sport played with a bat and ball", answer: "BASEBALL" },
+  { clue: "someone who builds things with wood", answer: "CARPENTER" },
+  { clue: "an extinct reptile from prehistoric times", answer: "DINOSAUR" },
+  { clue: "an insect that glows in the dark", answer: "FIREFLY" },
+  { clue: "a huge collection of stars in space", answer: "GALAXY" },
+  { clue: "a tool used for pounding nails", answer: "HAMMER" },
+  { clue: "a piece of land surrounded by water", answer: "ISLAND" },
+  { clue: "a piece of clothing worn over a shirt", answer: "JACKET" },
+  { clue: "a drink made from lemons, sugar, and water", answer: "LEMONADE" },
 ];
 
 // ── WORD LADDER POOL (verified against SHORT_WORDS in wordlist.js) ───────────
 
 const WORD_LADDER_POOL = [
-  { start: "CAT",   target: "DOG"   },
-  { start: "COLD",  target: "WARM"  },
-  { start: "HOT",   target: "TIP"   },
-  { start: "BIG",   target: "BAG"   },
-  { start: "FISH",  target: "RISE"  },
-  { start: "LOVE",  target: "TIME"  },
-  { start: "PEN",   target: "PIT"   },
-  { start: "READ",  target: "BOAT"  },
-  { start: "SEAT",  target: "TEAM"  },
-  { start: "STONE", target: "SCARE" },
-  { start: "BLACK", target: "CLINK" },
-  { start: "SUN",   target: "SAT"   },
-  { start: "GOLD",  target: "BELT"  },
-  { start: "RICE",  target: "LATE"  },
-  { start: "HOUSE", target: "GOOSE" },
-  { start: "MAP",   target: "BAT"   },
-  { start: "WIND",  target: "VANE"  },
-  { start: "PLANT", target: "PLACE" },
+  { start: "DUCK", target: "READ" }, // 5단계
+  { start: "DOOR", target: "LEAF" }, // 5단계
+  { start: "ICE", target: "PEN" }, // 5단계
+  { start: "ROCK", target: "LEAF" }, // 5단계
+  { start: "CUP", target: "OWL" }, // 5단계
+  { start: "BOX", target: "OIL" }, // 5단계
+  { start: "MILK", target: "WOLF" }, // 5단계
+  { start: "LAKE", target: "BOOK" }, // 5단계
+  { start: "OWL", target: "JAR" }, // 5단계
+  { start: "ICE", target: "CAR" }, // 5단계
+  { start: "SKY", target: "WEB" }, // 5단계
+  { start: "BROWN", target: "ROOTS" }, // 5단계
+  { start: "CUP", target: "KEY" }, // 5단계
+  { start: "EYE", target: "TAX" }, // 5단계
+  { start: "ELM", target: "BEE" }, // 5단계
+  { start: "CAR", target: "OIL" }, // 5단계
+  { start: "MOP", target: "ARM" }, // 5단계
+  { start: "ROCK", target: "GOAT" }, // 5단계
+  { start: "OAK", target: "FLY" }, // 5단계
+  { start: "AIR", target: "COW" }, // 5단계
+  { start: "GYM", target: "VAN" }, // 5단계
+  { start: "GYM", target: "EAR" }, // 5단계
+  { start: "DOCK", target: "SWAN" }, // 5단계
+  { start: "BEAR", target: "WASP" }, // 5단계
+  { start: "ZOO", target: "SEA" }, // 5단계
+  { start: "DUCK", target: "MOTH" }, // 5단계
+  { start: "FROG", target: "GOLD" }, // 5단계
+  { start: "LID", target: "ELM" }, // 5단계
+  { start: "GUN", target: "ANT" }, // 5단계
+  { start: "SWAN", target: "DEER" }, // 5단계
+  { start: "BUS", target: "ARM" }, // 5단계
+  { start: "PLANE", target: "SCARE" }, // 5단계
+  { start: "OAK", target: "TEA" }, // 5단계
+  { start: "FLY", target: "BIG" }, // 5단계
+  { start: "FLOOD", target: "CLOUD" }, // 5단계
+  { start: "GLASS", target: "ROOTS" }, // 5단계
+  { start: "FROG", target: "GOAT" }, // 5단계
+  { start: "TIGER", target: "WATER" }, // 5단계
+  { start: "ANT", target: "JAR" }, // 5단계
+  { start: "KEY", target: "JOB" }, // 5단계
+  { start: "AIR", target: "WEB" }, // 5단계
+  { start: "BEAR", target: "CRAB" }, // 5단계
+  { start: "STICK", target: "SNAKE" }, // 5단계
+  { start: "GARDEN", target: "MARKET" }, // 5단계
+  { start: "MILK", target: "LAMP" }, // 5단계
+  { start: "SKY", target: "PIG" }, // 5단계
+  { start: "GRASS", target: "DRAIN" }, // 5단계
+  { start: "JOB", target: "TEA" }, // 5단계
+  { start: "MOTH", target: "TOAD" }, // 5단계
+  { start: "WHALE", target: "STICK" }, // 5단계
+  { start: "DEER", target: "CLAM" }, // 5단계
 ];
+
 
 // ── ARITHMETIC GENERATOR ──────────────────────────────────────────────────────
 
 function generateArithProblem() {
-  const use3 = Math.random() < 0.3;
-  const rand = () => Math.floor(Math.random() * 888) + 12; // 12–899
+  const rand = () => Math.floor(Math.random() * 90) + 10; // 10–99 (2-digit)
 
-  const nums = [rand(), rand()];
-  const ops  = [Math.random() < 0.6 ? '+' : '-'];
-  if (use3) { nums.push(rand()); ops.push(Math.random() < 0.6 ? '+' : '-'); }
+  const nums = [rand(), rand(), rand()];
+  const ops  = [Math.random() < 0.6 ? '+' : '-', Math.random() < 0.6 ? '+' : '-'];
 
   let result = nums[0];
   for (let i = 0; i < ops.length; i++) {
@@ -794,7 +896,7 @@ function generateProofreading() {
 }
 
 function generateNumberSorting() {
-  const n = 5 + Math.floor(Math.random() * 3); // 5–7 unique numbers
+  const n = 6; // fixed at 6 unique numbers
   const set = new Set();
   while (set.size < n) set.add(Math.floor(Math.random() * 900) + 100); // 100–999 (3-digit only)
   const arr = [...set];
@@ -827,7 +929,7 @@ function getBlankValues() {
 // Reveals only ~30% of the letters (always including the first), instead of the
 // pool's old hand-picked patterns which averaged ~68% revealed and were too easy.
 function buildHiddenPattern(word) {
-  const ratio = 0.45 + Math.random() * 0.05; // 45–50% of letters revealed
+  const ratio = 0.475; // fixed at 47.5% of letters revealed — no per-instance randomness, for consistent difficulty
   const revealCount = Math.max(2, Math.round(word.length * ratio));
   const otherPositions = shuffledIndices(word.length - 1).map(i => i + 1); // positions 1..length-1, shuffled, never overlaps with 0
   const revealSet = new Set([0, ...otherPositions.slice(0, revealCount - 1)]);
